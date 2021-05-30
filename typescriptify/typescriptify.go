@@ -84,6 +84,7 @@ type TypeScriptify struct {
 	BackupDir         string // If empty no backup
 	DontExport        bool
 	CreateInterface   bool
+	UseYaml           bool
 	customImports     []string
 
 	structTypes []StructType
@@ -501,17 +502,21 @@ func (t *TypeScriptify) getFieldOptions(structType reflect.Type, field reflect.S
 	return opts
 }
 
-func (t *TypeScriptify) getJSONFieldName(field reflect.StructField, isPtr bool) string {
-	jsonFieldName := ""
-	jsonTag := field.Tag.Get("json")
-	if len(jsonTag) > 0 {
-		jsonTagParts := strings.Split(jsonTag, ",")
-		if len(jsonTagParts) > 0 {
-			jsonFieldName = strings.Trim(jsonTagParts[0], t.Indent)
+func (t *TypeScriptify) getSerializationFieldName(useYaml bool, field reflect.StructField, isPtr bool) string {
+	serializationFieldName := ""
+	tagName := "json"
+	if useYaml {
+		tagName = "yaml"
+	}
+	serializationTag := field.Tag.Get(tagName)
+	if len(serializationTag) > 0 {
+		serializationTagParts := strings.Split(serializationTag, ",")
+		if len(serializationTagParts) > 0 {
+			serializationFieldName = strings.Trim(serializationTagParts[0], t.Indent)
 		}
 		hasOmitEmpty := false
 		ignored := false
-		for _, t := range jsonTagParts {
+		for _, t := range serializationTagParts {
 			if t == "" {
 				break
 			}
@@ -525,10 +530,10 @@ func (t *TypeScriptify) getJSONFieldName(field reflect.StructField, isPtr bool) 
 			}
 		}
 		if !ignored && isPtr || hasOmitEmpty {
-			jsonFieldName = fmt.Sprintf("%s?", jsonFieldName)
+			serializationFieldName = fmt.Sprintf("%s?", serializationFieldName)
 		}
 	}
-	return jsonFieldName
+	return serializationFieldName
 }
 
 func (t *TypeScriptify) convertType(depth int, typeOf reflect.Type, customCode map[string]string) (string, error) {
@@ -562,7 +567,7 @@ func (t *TypeScriptify) convertType(depth int, typeOf reflect.Type, customCode m
 		if isPtr {
 			field.Type = field.Type.Elem()
 		}
-		jsonFieldName := t.getJSONFieldName(field, isPtr)
+		jsonFieldName := t.getSerializationFieldName(t.UseYaml, field, isPtr)
 		if len(jsonFieldName) == 0 || jsonFieldName == "-" {
 			continue
 		}

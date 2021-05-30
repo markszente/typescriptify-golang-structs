@@ -16,29 +16,29 @@ import (
 
 type Address struct {
 	// Used in html
-	Duration float64 `json:"duration"`
-	Text1    string  `json:"text,omitempty"`
+	Duration float64 `json:"duration" yaml:"duration"`
+	Text1    string  `json:"text,omitempty" yaml:"text,omitempty"`
 	// Ignored:
-	Text2 string `json:",omitempty"`
-	Text3 string `json:"-"`
+	Text2 string `json:",omitempty" yaml:",omitempty"`
+	Text3 string `json:"-" yaml:"-"`
 }
 
 type Dummy struct {
-	Something string `json:"something"`
+	Something string `json:"something" yaml:"something"`
 }
 
 type HasName struct {
-	Name string `json:"name"`
+	Name string `json:"name" yaml:"name"`
 }
 
 type Person struct {
 	HasName
-	Nicknames []string  `json:"nicknames"`
-	Addresses []Address `json:"addresses"`
-	Address   *Address  `json:"address"`
-	Metadata  string    `json:"metadata" ts_type:"{[key:string]:string}" ts_transform:"JSON.parse(__VALUE__ || \"{}\")"`
-	Friends   []*Person `json:"friends"`
-	Dummy     Dummy     `json:"a"`
+	Nicknames []string  `json:"nicknames" yaml:"nicknames"`
+	Addresses []Address `json:"addresses" yaml:"addresses"`
+	Address   *Address  `json:"address" yaml:"address"`
+	Metadata  string    `json:"metadata" yaml:"metadata" ts_type:"{[key:string]:string}" ts_transform:"JSON.parse(__VALUE__ || \"{}\")"`
+	Friends   []*Person `json:"friends" yaml:"friends"`
+	Dummy     Dummy     `json:"a" yaml:"a"`
 }
 
 func TestTypescriptifyWithTypes(t *testing.T) {
@@ -401,7 +401,7 @@ func TestDate(t *testing.T) {
 func TestDateWithoutTags(t *testing.T) {
 	t.Parallel()
 	type TestCustomType struct {
-		Time time.Time `json:"time"`
+		Time time.Time `json:"time" yaml:"time"`
 	}
 
 	// Test with custom field options defined per-one-struct:
@@ -443,7 +443,7 @@ func TestDateWithoutTags(t *testing.T) {
 func TestRecursive(t *testing.T) {
 	t.Parallel()
 	type Test struct {
-		Children []Test `json:"children"`
+		Children []Test `json:"children" yaml:"children"`
 	}
 
 	converter := New()
@@ -472,10 +472,10 @@ func TestRecursive(t *testing.T) {
 func TestArrayOfArrays(t *testing.T) {
 	t.Parallel()
 	type Key struct {
-		Key string `json:"key"`
+		Key string `json:"key" yaml:"key"`
 	}
 	type Keyboard struct {
-		Keys [][]Key `json:"keys"`
+		Keys [][]Key `json:"keys" yaml:"keys"`
 	}
 
 	converter := New()
@@ -517,8 +517,8 @@ func TestFixedArray(t *testing.T) {
 	t.Parallel()
 	type Sub struct{}
 	type Tmp struct {
-		Arr  [3]string `json:"arr"`
-		Arr2 [3]Sub    `json:"arr2"`
+		Arr  [3]string `json:"arr" yaml:"arr"`
+		Arr2 [3]Sub    `json:"arr2" yaml:"arr2"`
 	}
 
 	converter := New()
@@ -554,7 +554,7 @@ export class Tmp {
 func TestAny(t *testing.T) {
 	t.Parallel()
 	type Test struct {
-		Any interface{} `json:"field"`
+		Any interface{} `json:"field" yaml:"field"`
 	}
 
 	converter := New()
@@ -587,7 +587,7 @@ func (t NumberTime) MarshalJSON() ([]byte, error) {
 func TestTypeAlias(t *testing.T) {
 	t.Parallel()
 	type Person struct {
-		Birth NumberTime `json:"birth" ts_type:"number"`
+		Birth NumberTime `json:"birth" yaml:"birt" ts_type:"number"`
 	}
 
 	converter := New()
@@ -614,7 +614,7 @@ func TestOverrideCustomType(t *testing.T) {
 	t.Parallel()
 
 	type SomeStruct struct {
-		Time MSTime `json:"time" ts_type:"number"`
+		Time MSTime `json:"time" yaml:"time" ts_type:"number"`
 	}
 	var _ json.Marshaler = new(MSTime)
 	var _ json.Unmarshaler = new(MSTime)
@@ -694,8 +694,8 @@ var allWeekdaysV2 = []struct {
 }
 
 type Holliday struct {
-	Name    string  `json:"name"`
-	Weekday Weekday `json:"weekday"`
+	Name    string  `json:"name" yaml:"name"`
+	Weekday Weekday `json:"weekday" yaml:"weekday"`
 }
 
 func TestEnum(t *testing.T) {
@@ -829,9 +829,9 @@ export class Person {
 }
 
 type WithMap struct {
-	Map        map[string]int      `json:"simpleMap"`
-	MapObjects map[string]Address  `json:"mapObjects"`
-	PtrMap     *map[string]Address `json:"ptrMapObjects"`
+	Map        map[string]int      `json:"simpleMap" yaml:"simpleMap"`
+	MapObjects map[string]Address  `json:"mapObjects" yaml:"mapObjects"`
+	PtrMap     *map[string]Address `json:"ptrMapObjects" yaml:"ptrMapObjects"`
 }
 
 func TestMaps(t *testing.T) {
@@ -891,7 +891,7 @@ func TestMaps(t *testing.T) {
 func TestPTR(t *testing.T) {
 	t.Parallel()
 	type Person struct {
-		Name *string `json:"name"`
+		Name *string `json:"name" yaml:"name"`
 	}
 
 	converter := New()
@@ -987,8 +987,8 @@ class Address {
 func TestIgnoredPTR(t *testing.T) {
 	t.Parallel()
 	type PersonWithIgnoredPtr struct {
-		Name     string  `json:"name"`
-		Nickname *string `json:"-"`
+		Name     string  `json:"name" yaml:"name"`
+		Nickname *string `json:"-" yaml:"-"`
 	}
 
 	converter := New()

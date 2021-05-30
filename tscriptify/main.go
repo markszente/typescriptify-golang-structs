@@ -57,6 +57,7 @@ type Params struct {
 	InitParams    map[string]interface{}
 	CustomImports arrayImports
 	Interface     bool
+	UseYaml       bool
 }
 
 func main() {
@@ -68,6 +69,7 @@ func main() {
 	flag.StringVar(&backupDir, "backup", "", "Directory where backup files are saved")
 	flag.BoolVar(&p.Interface, "interface", false, "Create interfaces (not classes)")
 	flag.Var(&customImports, "import", "Typescript import for your custom type, repeat this option for each import needed")
+	flag.BoolVar(&p.UseYaml, "yaml", false, "Use YAML tags (instead of JSON)")
 	flag.Parse()
 
 	structs := []string{}
@@ -118,6 +120,7 @@ func main() {
 	p.Structs = structsArr
 	p.InitParams = map[string]interface{}{
 		"BackupDir": fmt.Sprintf(`"%s"`, backupDir),
+		"UseYaml":   fmt.Sprintf("%v", p.UseYaml),
 	}
 	err = t.Execute(f, p)
 	handleErr(err)
